@@ -1,15 +1,16 @@
 #ifndef CSTACK_H
 #define CSTACK_H
-#define CSTACK_BOTLIM 0
-struct CSTACK
+#include <stdbool.h>
+typedef struct cstack
 {
-    void *data; // Data to
-    int size;
-};
+    int *data; // Dynamic memory allocation.
+    unsigned int size;
+} CStack_Dynamic;
 
-typedef struct CSTACK CStack;
+void cstack_init(CStack_Dynamic *p);
+void cstack_end(CStack_Dynamic *p);
+void cstack_push(CStack_Dynamic *p, int data);
+void cstack_pop(CStack_Dynamic *p);
+bool cstack_is_full(CStack_Dynamic *p);
 
-void cstack_init(CStack *p);
-void cstack_end(CStack *p);
-void cstack_push(CStack *p, void *data);
 #endif

@@ -1,65 +1,92 @@
+#include "../include/cstack.h"
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <memory.h>
-#include "../include/cstack.h"
-
-void cstack_init(CStack *p)
-{
-    if (p != NULL)
-    {
-        p->data = NULL;
-        p->size = CSTACK_BOTLIM;
-        return;
-    }
-    perror("ctack-said-> Can't init an invalid pointer");
-    return;
-}
-
-void cstack_end(CStack *p)
-{
-    if (p != NULL)
-    {
-        free(p->data);
-        return;
-    }
-    perror("cstack-said-> Can't end an invalid pointer");
-}
-
-void cstack_push(CStack *p, void *data)
+void cstack_init(CStack_Dynamic *p)
 {
     if (p == NULL)
     {
-        perror("cstack-said-> Can't add data to an invalid pointer");
-        return;
+        perror("cstack-said-> Invalid ptr to stack");
+        exit(EXIT_FAILURE);
     }
 
-    if (data == NULL)
+    if (*p->data != NULL)
     {
-        perror("cstack-said-> Can't add new data if data is NULL");
-        return;
+        perror("cstack-said-> This stack is already open");
+        free(p->data);
+        exit(EXIT_FAILURE);
+    }
+
+    p->data = NULL;
+    p->size = 0;
+    return;
+}
+
+void cstack_end(CStack_Dynamic *p)
+{
+    if (p == NULL)
+    {
+        perror("cstack-said-> Invalid pointer to free");
+        exit(EXIT_FAILURE);
+    }
+
+    if (*p->data == NULL)
+    {
+        perror("cstack-said-> Cannot free an NULL pointer");
+        exit(EXIT_FAILURE);
+    }
+
+    free(p->data);
+    p->size = 0;
+}
+
+void cstack_push(CStack_Dynamic *p, int data)
+{
+    if (p == NULL)
+    {
+        perror("cstack-said-> Invalid pointer to push");
+        exit(EXIT_FAILURE);
     }
 
     if (p->data == NULL)
     {
-        p->data = malloc(sizeof(void *));
+        p->data = (int *)malloc(sizeof(int));
         if (!p->data)
         {
-            perror("cstack-said-> Running out of memory.");
-            return;
+            perror("cstack-said-> Running out of memory, cannot malloc.");
+            exit(EXIT_FAILURE);
         }
-        p->size = 1;
-        memcpy(p->data, &data, sizeof(void *));
-    }
-    else
-    {
-        p->data = realloc(p->data, (p->size + 1) * sizeof(void *));
-        if (!p->data)
-        {
-            perror("cstack-said-> Running out of memory.");
-            return;
-        }
-        memcpy(p->data + p->size, &data, sizeof(void *));
+
+        p->data[0] = data;
         p->size++;
     }
+
+    else
+    {
+        p->data = (int *)realloc(p->data, sizeof(int) * ++p->size);
+        if (!p->data)
+        {
+            perror("cstack-said-> Running out of memory, cannot malloc.");
+            exit(EXIT_FAILURE);
+        }
+
+        p->data[p->size - 1] = data;
+    }
+}
+void cstack_pop(CStack_Dynamic *p)
+{
+    if (p == NULL)
+    {
+        perror("cstack-said-> Invalid pointer to free");
+        exit(EXIT_FAILURE);
+    }
+
+    if (p->size == 0)
+    {
+        perror("cstack-said-> Cannot pop with 0 height");
+    }
+
+    p->data[p->size - 1] = -1;
+    p->data = (int *)realloc(p->data, sizeof(int) * --p->size);
 }
